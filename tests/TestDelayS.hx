@@ -1,20 +1,20 @@
 import utest.Assert;
 import utest.Async;
 import utest.Test;
-import Delayer;
+import TimeTask;
 import thx.Time;
 
 using Std;
 
 class TestDelayS extends Test {
 	var cancel:Void->Void;
-	var d:Delayer;
+	var d:TimeTask;
 	var delta:Float;
    final fps=60;
 	final errorRange=1;
 
 	function setup() {
-		d = new Delayer(fps);
+		d = new TimeTask(fps);
 		delta = 0;
 		cancel = thx.Timer.frame(function(_delta) {
 			delta +=1;

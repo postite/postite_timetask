@@ -22,224 +22,6 @@ DateTools.getMonthDays = function(d) {
 		return 28;
 	}
 };
-var _$Debug_LogLevel_$Impl_$ = {};
-_$Debug_LogLevel_$Impl_$.__name__ = "_Debug.LogLevel_Impl_";
-_$Debug_LogLevel_$Impl_$.toString = function(this1) {
-	switch(this1) {
-	case 20:
-		return "INF";
-	case 30:
-		return "WRN";
-	case 40:
-		return "ERR";
-	case 50:
-		return "!!!";
-	default:
-		return "DBG";
-	}
-};
-_$Debug_LogLevel_$Impl_$.format = function(this1,s,color,pos) {
-	if(color == null) {
-		color = true;
-	}
-	HxOverrides.dateStr(new Date());
-	var p = StringTools.lpad(pos.fileName," ",_$Debug_LogLevel_$Impl_$.longest) + ":" + StringTools.lpad(pos.lineNumber == null ? "null" : "" + pos.lineNumber," ",4) + ":";
-	var l;
-	switch(this1) {
-	case 20:
-		l = "INF";
-		break;
-	case 30:
-		l = "WRN";
-		break;
-	case 40:
-		l = "ERR";
-		break;
-	case 50:
-		l = "!!!";
-		break;
-	default:
-		l = "DBG";
-	}
-	return "" + p + " " + l + ":" + s;
-};
-var Debug = function() { };
-Debug.__name__ = "Debug";
-Debug.Log = function(msg,level,pos) {
-	if(level == null) {
-		level = 20;
-	}
-	var tmp = haxe_Log.trace;
-	var s = Std.string(msg);
-	HxOverrides.dateStr(new Date());
-	var p = StringTools.lpad(pos.fileName," ",_$Debug_LogLevel_$Impl_$.longest) + ":" + StringTools.lpad(pos.lineNumber == null ? "null" : "" + pos.lineNumber," ",4) + ":";
-	var l;
-	switch(level) {
-	case 20:
-		l = "INF";
-		break;
-	case 30:
-		l = "WRN";
-		break;
-	case 40:
-		l = "ERR";
-		break;
-	case 50:
-		l = "!!!";
-		break;
-	default:
-		l = "DBG";
-	}
-	tmp("" + p + " " + l + ":" + s,pos);
-	return msg;
-};
-Debug.warn = function(msg,level,pos) {
-	if(level == null) {
-		level = 20;
-	}
-	return Debug.Log(msg,30,pos);
-};
-Debug.error = function(msg,level,pos) {
-	if(level == null) {
-		level = 20;
-	}
-	return Debug.Log(msg,40,pos);
-};
-var _$Delayer_Task = function(id,cb,secs) {
-	this.cb = cb;
-	this.id = id;
-	this.secs = secs;
-};
-_$Delayer_Task.__name__ = "_Delayer.Task";
-_$Delayer_Task.prototype = {
-	id: null
-	,cb: null
-	,secs: null
-	,dby: null
-	,toString: function() {
-		return this.secs + " " + Std.string(this.cb);
-	}
-	,__class__: _$Delayer_Task
-};
-var Delayer = function(fps) {
-	this.paused = false;
-	this.now = 0;
-	this.fps = fps;
-	this.delays = [];
-};
-Delayer.__name__ = "Delayer";
-Delayer.prototype = {
-	delays: null
-	,now: null
-	,fps: null
-	,delayTime: null
-	,toString: function() {
-		var tmp = "Delayer(now=" + this.now + ",timers=";
-		var _this = this.delays;
-		var result = new Array(_this.length);
-		var _g = 0;
-		var _g1 = _this.length;
-		while(_g < _g1) {
-			var i = _g++;
-			result[i] = _this[i].secs;
-		}
-		return tmp + result.join(",") + ")";
-	}
-	,isDestroyed: function() {
-		return this.delays == null;
-	}
-	,destroy: function() {
-		this.delays = null;
-	}
-	,skip: function() {
-		var limit = this.delays.length + 100;
-		while(this.delays.length > 0 && limit-- > 0) {
-			var d = this.delays.shift();
-			d.cb();
-			d.cb = null;
-		}
-	}
-	,cancelEverything: function() {
-		this.delays = [];
-	}
-	,hasId: function(id) {
-		var _g = 0;
-		var _g1 = this.delays;
-		while(_g < _g1.length) {
-			var e = _g1[_g];
-			++_g;
-			if(e.id == id) {
-				return true;
-			}
-		}
-		return false;
-	}
-	,cancelById: function(id) {
-		var i = 0;
-		while(i < this.delays.length) if(this.delays[i].id == id) {
-			this.delays.splice(i,1);
-		} else {
-			++i;
-		}
-		this.calcdelayTime();
-	}
-	,runImmediatly: function(id) {
-		var i = 0;
-		while(i < this.delays.length) if(this.delays[i].id == id) {
-			var cb = this.delays[i].cb;
-			this.delays.splice(i,1);
-			cb();
-		} else {
-			++i;
-		}
-		this.calcdelayTime();
-	}
-	,cmp: function(a,b) {
-		if(a.secs < b.secs) {
-			return -1;
-		} else if(a.secs > b.secs) {
-			return 1;
-		} else {
-			return 0;
-		}
-	}
-	,paused: null
-	,pause: function() {
-		this.paused = true;
-	}
-	,wakeup: function() {
-		this.paused = false;
-	}
-	,addMs: function(id,cb,msecs) {
-		this.delays.push(new _$Delayer_Task(id,cb,msecs / 1000 * this.fps | 0));
-		this.calcdelayTime();
-	}
-	,addS: function(id,cb,secs) {
-		this.delays.push(new _$Delayer_Task(id,cb,secs * this.fps | 0));
-		this.calcdelayTime();
-	}
-	,calcdelayTime: function() {
-		var _gthis = this;
-		this.delayTime = 0;
-		Lambda.fold(this.delays,function(a,b) {
-			_gthis.delayTime += a.secs;
-			a.dby = _gthis.delayTime;
-			return a;
-		},this.delays[0]);
-	}
-	,update: function(dt) {
-		if(this.paused) {
-			return;
-		}
-		if(this.delays.length > 0 && this.delays[0].dby <= this.now) {
-			var d = this.delays.shift();
-			d.cb();
-			d.cb = null;
-		}
-		this.now += dt;
-	}
-	,__class__: Delayer
-};
 var EReg = function(r,opt) {
 	this.r = new RegExp(r,opt.split("u").join(""));
 };
@@ -646,7 +428,7 @@ TestDelayMs.prototype = $extend(utest_Test.prototype,{
 	,fps: null
 	,setup: function() {
 		var _gthis = this;
-		this.d = new Delayer(this.fps);
+		this.d = new TimeTask(this.fps);
 		this.delta = 0;
 		this.cancel = thx_Timer.frame(function(_delta) {
 			_gthis.delta += 1;
@@ -827,6 +609,141 @@ TestDelayMs.prototype = $extend(utest_Test.prototype,{
 	}
 	,__class__: TestDelayMs
 });
+var _$TimeTask_Task = function(id,cb,secs) {
+	this.cb = cb;
+	this.id = id;
+	this.secs = secs;
+};
+_$TimeTask_Task.__name__ = "_TimeTask.Task";
+_$TimeTask_Task.prototype = {
+	id: null
+	,cb: null
+	,secs: null
+	,dby: null
+	,toString: function() {
+		return this.secs + " " + Std.string(this.cb);
+	}
+	,__class__: _$TimeTask_Task
+};
+var TimeTask = function(fps) {
+	this.paused = false;
+	this.now = 0;
+	this.fps = fps;
+	this.delays = [];
+};
+TimeTask.__name__ = "TimeTask";
+TimeTask.prototype = {
+	delays: null
+	,now: null
+	,fps: null
+	,delayTime: null
+	,toString: function() {
+		var tmp = "Delayer(now=" + this.now + ",timers=";
+		var _this = this.delays;
+		var result = new Array(_this.length);
+		var _g = 0;
+		var _g1 = _this.length;
+		while(_g < _g1) {
+			var i = _g++;
+			result[i] = _this[i].secs;
+		}
+		return tmp + result.join(",") + ")";
+	}
+	,isDestroyed: function() {
+		return this.delays == null;
+	}
+	,destroy: function() {
+		this.delays = null;
+	}
+	,skip: function() {
+		var limit = this.delays.length + 100;
+		while(this.delays.length > 0 && limit-- > 0) {
+			var d = this.delays.shift();
+			d.cb();
+			d.cb = null;
+		}
+	}
+	,cancelEverything: function() {
+		this.delays = [];
+	}
+	,hasId: function(id) {
+		var _g = 0;
+		var _g1 = this.delays;
+		while(_g < _g1.length) {
+			var e = _g1[_g];
+			++_g;
+			if(e.id == id) {
+				return true;
+			}
+		}
+		return false;
+	}
+	,cancelById: function(id) {
+		var i = 0;
+		while(i < this.delays.length) if(this.delays[i].id == id) {
+			this.delays.splice(i,1);
+		} else {
+			++i;
+		}
+		this.calcdelayTime();
+	}
+	,runImmediatly: function(id) {
+		var i = 0;
+		while(i < this.delays.length) if(this.delays[i].id == id) {
+			var cb = this.delays[i].cb;
+			this.delays.splice(i,1);
+			cb();
+		} else {
+			++i;
+		}
+		this.calcdelayTime();
+	}
+	,cmp: function(a,b) {
+		if(a.secs < b.secs) {
+			return -1;
+		} else if(a.secs > b.secs) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+	,paused: null
+	,pause: function() {
+		this.paused = true;
+	}
+	,wakeup: function() {
+		this.paused = false;
+	}
+	,addMs: function(id,cb,msecs) {
+		this.delays.push(new _$TimeTask_Task(id,cb,msecs / 1000 * this.fps | 0));
+		this.calcdelayTime();
+	}
+	,addS: function(id,cb,secs) {
+		this.delays.push(new _$TimeTask_Task(id,cb,secs * this.fps | 0));
+		this.calcdelayTime();
+	}
+	,calcdelayTime: function() {
+		var _gthis = this;
+		this.delayTime = 0;
+		Lambda.fold(this.delays,function(a,b) {
+			_gthis.delayTime += a.secs;
+			a.dby = _gthis.delayTime;
+			return a;
+		},this.delays[0]);
+	}
+	,update: function(dt) {
+		if(this.paused) {
+			return;
+		}
+		if(this.delays.length > 0 && this.delays[0].dby <= this.now) {
+			var d = this.delays.shift();
+			d.cb();
+			d.cb = null;
+		}
+		this.now += dt;
+	}
+	,__class__: TimeTask
+};
 var ValueType = $hxEnums["ValueType"] = { __ename__ : "ValueType", __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"]
 	,TNull: {_hx_index:0,__enum__:"ValueType",toString:$estr}
 	,TInt: {_hx_index:1,__enum__:"ValueType",toString:$estr}
@@ -17115,12 +17032,6 @@ if(typeof(scope.performance.now) == "undefined") {
 	scope.performance.now = now;
 }
 DateTools.DAYS_OF_MONTH = [31,28,31,30,31,30,31,31,30,31,30,31];
-_$Debug_LogLevel_$Impl_$.Debug = 10;
-_$Debug_LogLevel_$Impl_$.Info = 20;
-_$Debug_LogLevel_$Impl_$.Warning = 30;
-_$Debug_LogLevel_$Impl_$.Error = 40;
-_$Debug_LogLevel_$Impl_$.Critical = 50;
-_$Debug_LogLevel_$Impl_$.longest = 10;
 haxe__$Int32_Int32_$Impl_$._mul = Math.imul != null ? Math.imul : function(a,b) {
 	return a * (b & 65535) + (a * (b >>> 16) << 16 | 0) | 0;
 };

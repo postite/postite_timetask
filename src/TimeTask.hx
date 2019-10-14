@@ -3,7 +3,7 @@ using Lambda;
 
 // mostly inspired by deepnightLibs
 
-@:allow(Delayer)
+@:allow(TimeTask)
 private class Task { //classes are faster
 
 	//public var t	: Float;
@@ -22,7 +22,7 @@ private class Task { //classes are faster
 	public inline function toString() return secs + " " + cb;
 }
 
-class Delayer {
+class TimeTask {
 	var delays	: Array<Task>;
 	var now		: Float;
 	var fps		: Float;

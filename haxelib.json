@@ -1,0 +1,14 @@
+{
+    "name": "postite_droz",
+    "url" : "https://github.com/postite/postite_timetask",
+    "license": "MIT",
+    "tags": ["timing"],
+    "description": "",
+    "version": "0.0.1",
+    "classPath": "src/",
+    "releasenote": "init",
+    "contributors": ["postite"],
+    "dependencies": {
+        
+    }
+}
