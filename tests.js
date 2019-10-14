@@ -22,6 +22,89 @@ DateTools.getMonthDays = function(d) {
 		return 28;
 	}
 };
+var _$Debug_LogLevel_$Impl_$ = {};
+_$Debug_LogLevel_$Impl_$.__name__ = "_Debug.LogLevel_Impl_";
+_$Debug_LogLevel_$Impl_$.toString = function(this1) {
+	switch(this1) {
+	case 20:
+		return "INF";
+	case 30:
+		return "WRN";
+	case 40:
+		return "ERR";
+	case 50:
+		return "!!!";
+	default:
+		return "DBG";
+	}
+};
+_$Debug_LogLevel_$Impl_$.format = function(this1,s,color,pos) {
+	if(color == null) {
+		color = true;
+	}
+	HxOverrides.dateStr(new Date());
+	var p = StringTools.lpad(pos.fileName," ",_$Debug_LogLevel_$Impl_$.longest) + ":" + StringTools.lpad(pos.lineNumber == null ? "null" : "" + pos.lineNumber," ",4) + ":";
+	var l;
+	switch(this1) {
+	case 20:
+		l = "INF";
+		break;
+	case 30:
+		l = "WRN";
+		break;
+	case 40:
+		l = "ERR";
+		break;
+	case 50:
+		l = "!!!";
+		break;
+	default:
+		l = "DBG";
+	}
+	return "" + p + " " + l + ":" + s;
+};
+var Debug = function() { };
+Debug.__name__ = "Debug";
+Debug.Log = function(msg,level,pos) {
+	if(level == null) {
+		level = 20;
+	}
+	var tmp = haxe_Log.trace;
+	var s = Std.string(msg);
+	HxOverrides.dateStr(new Date());
+	var p = StringTools.lpad(pos.fileName," ",_$Debug_LogLevel_$Impl_$.longest) + ":" + StringTools.lpad(pos.lineNumber == null ? "null" : "" + pos.lineNumber," ",4) + ":";
+	var l;
+	switch(level) {
+	case 20:
+		l = "INF";
+		break;
+	case 30:
+		l = "WRN";
+		break;
+	case 40:
+		l = "ERR";
+		break;
+	case 50:
+		l = "!!!";
+		break;
+	default:
+		l = "DBG";
+	}
+	tmp("" + p + " " + l + ":" + s,pos);
+	return msg;
+};
+Debug.warn = function(msg,level,pos) {
+	if(level == null) {
+		level = 20;
+	}
+	return Debug.Log(msg,30,pos);
+};
+Debug.error = function(msg,level,pos) {
+	if(level == null) {
+		level = 20;
+	}
+	return Debug.Log(msg,40,pos);
+};
 var EReg = function(r,opt) {
 	this.r = new RegExp(r,opt.split("u").join(""));
 };
@@ -416,6 +499,7 @@ utest_Test.prototype = {
 	,__class__: utest_Test
 };
 var TestDelayMs = function() {
+	this.done = false;
 	this.fps = 60;
 	utest_Test.call(this);
 };
@@ -426,9 +510,12 @@ TestDelayMs.prototype = $extend(utest_Test.prototype,{
 	,d: null
 	,delta: null
 	,fps: null
+	,done: null
 	,setup: function() {
 		var _gthis = this;
-		this.d = new TimeTask(this.fps);
+		this.d = new TimeTask(this.fps,function() {
+			_gthis.done = Debug.Log(true,null,{ fileName : "tests/TestDelayMs.hx", lineNumber : 16, className : "TestDelayMs", methodName : "setup"});
+		});
 		this.delta = 0;
 		this.cancel = thx_Timer.frame(function(_delta) {
 			_gthis.delta += 1;
@@ -551,6 +638,23 @@ TestDelayMs.prototype = $extend(utest_Test.prototype,{
 		this.d.cancelEverything();
 		utest_Assert.isFalse(this.d.hasId("huit"),null,{ fileName : "tests/TestDelayMs.hx", lineNumber : 143, className : "TestDelayMs", methodName : "testCancelEverything"});
 	}
+	,testDone: function(asy) {
+		var _gthis = this;
+		this.d.addMs(null,function() {
+			return;
+		},40);
+		this.d.addMs("huit",function() {
+			return;
+		},80);
+		this.d.addMs(null,function() {
+			utest_Assert.floatEquals(140,_gthis.delta / _gthis.fps * 1000 | 0,10,null,{ fileName : "tests/TestDelayMs.hx", lineNumber : 152, className : "TestDelayMs", methodName : "testDone"});
+			haxe_Timer.delay(function() {
+				utest_Assert.isTrue(_gthis.done,null,{ fileName : "tests/TestDelayMs.hx", lineNumber : 155, className : "TestDelayMs", methodName : "testDone"});
+				asy.done({ fileName : "tests/TestDelayMs.hx", lineNumber : 156, className : "TestDelayMs", methodName : "testDone"});
+				return;
+			},10);
+		},20);
+	}
 	,__initializeUtest__: function() {
 		var _gthis = this;
 		var init = utest_Test.prototype.__initializeUtest__.call(this);
@@ -605,6 +709,11 @@ TestDelayMs.prototype = $extend(utest_Test.prototype,{
 			_gthis.testCancelEverything();
 			return utest_Async.getResolved();
 		}});
+		init.tests.push({ name : "testDone", execute : function() {
+			var async7 = new utest_Async(1000);
+			_gthis.testDone(async7);
+			return async7;
+		}});
 		return init;
 	}
 	,__class__: TestDelayMs
@@ -625,11 +734,17 @@ _$TimeTask_Task.prototype = {
 	}
 	,__class__: _$TimeTask_Task
 };
-var TimeTask = function(fps) {
+var TimeTask = function(fps,_done) {
 	this.paused = false;
 	this.now = 0;
 	this.fps = fps;
 	this.delays = [];
+	if(_done != null) {
+		this.done = _done;
+	} else {
+		this.done = function() {
+		};
+	}
 };
 TimeTask.__name__ = "TimeTask";
 TimeTask.prototype = {
@@ -637,6 +752,7 @@ TimeTask.prototype = {
 	,now: null
 	,fps: null
 	,delayTime: null
+	,done: null
 	,toString: function() {
 		var tmp = "Delayer(now=" + this.now + ",timers=";
 		var _this = this.delays;
@@ -736,8 +852,12 @@ TimeTask.prototype = {
 			return;
 		}
 		if(this.delays.length > 0 && this.delays[0].dby <= this.now) {
+			var last = this.delays.length == 1;
 			var d = this.delays.shift();
 			d.cb();
+			if(last) {
+				this.done();
+			}
 			d.cb = null;
 		}
 		this.now += dt;
@@ -17032,6 +17152,12 @@ if(typeof(scope.performance.now) == "undefined") {
 	scope.performance.now = now;
 }
 DateTools.DAYS_OF_MONTH = [31,28,31,30,31,30,31,31,30,31,30,31];
+_$Debug_LogLevel_$Impl_$.Debug = 10;
+_$Debug_LogLevel_$Impl_$.Info = 20;
+_$Debug_LogLevel_$Impl_$.Warning = 30;
+_$Debug_LogLevel_$Impl_$.Error = 40;
+_$Debug_LogLevel_$Impl_$.Critical = 50;
+_$Debug_LogLevel_$Impl_$.longest = 10;
 haxe__$Int32_Int32_$Impl_$._mul = Math.imul != null ? Math.imul : function(a,b) {
 	return a * (b & 65535) + (a * (b >>> 16) << 16 | 0) | 0;
 };

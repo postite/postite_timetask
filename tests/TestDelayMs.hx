@@ -3,7 +3,7 @@ import utest.Async;
 import utest.Test;
 import TimeTask;
 import thx.Time;
-
+using Debug;
 using Std;
 
 class TestDelayMs extends Test {
@@ -11,9 +11,9 @@ class TestDelayMs extends Test {
 	var d:TimeTask;
 	var delta:Float;
    final fps=60;
-
+	var done:Bool=false;
 	function setup() {
-		d = new TimeTask(fps);
+		d = new TimeTask(fps,function()done=true.Log());
 		delta = 0;
 		cancel = thx.Timer.frame(function(_delta) {
 			delta +=1;
@@ -143,6 +143,24 @@ class TestDelayMs extends Test {
 		Assert.isFalse(d.hasId('huit'));
 		
    }
+	@:timeout(1000)
+	public function testDone(asy:Async)
+	{
+		d.addMs(()->null, 40);
+		d.addMs("huit", ()->null,80);
+		d.addMs(function() {
+			Assert.floatEquals(140,toDeltaMS(),10);
+			
+			haxe.Timer.delay(()->{
+				Assert.isTrue(done);
+				asy.done();
+				}
+				,10);
+			
+			
+		}, 20);
+      
+	}
 
    
 

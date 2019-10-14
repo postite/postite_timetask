@@ -27,11 +27,15 @@ class TimeTask {
 	var now		: Float;
 	var fps		: Float;
    public var delayTime:Int;
-
-	public function new(fps:Float) { //no need for nullability because no other nullable args
+	var done:Void->Void;
+	public function new(fps:Float,?_done:Void->Void) { //no need for nullability because no other nullable args
 		now = 0;
 		this.fps = fps;
 		delays = new Array();
+		if(_done!=null)
+		this.done=_done;
+		else
+		this.done=function(){};
 	}
 
 	public function toString() {
@@ -137,8 +141,16 @@ class TimeTask {
          if( delays.length>0 && delays[0].dby<=now){
             //trace( 'update length=${delays.length} delays[0]:${delays[0].dby} now:$now');
 			//trace('now=$now');
+			var last=(delays.length==1);
          var d = delays.shift();
-         d.cb();
+			
+			d.cb();
+			
+				if(last)
+				done();
+
+			
+
 			d.cb = null;//help garbage
 		   }
          now+=dt;
