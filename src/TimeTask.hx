@@ -138,14 +138,14 @@ class TimeTask {
              return;
         // trace( '$delayTime of $now');
         // while( delays.length>0  ) {
-         if( delays.length>0 && delays[0].dby<=now){
+         if(delays!=null && delays.length>0 && delays[0].dby<=now){
             //trace( 'update length=${delays.length} delays[0]:${delays[0].dby} now:$now');
 			//trace('now=$now');
 			var last=(delays.length==1);
          var d = delays.shift();
 			
 			d.cb();
-			
+
 				if(last)
 				done();
 
