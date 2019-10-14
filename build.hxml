@@ -1,0 +1,7 @@
+-cp src
+-D analyzer-optimize
+-main Main
+--debug
+-lib hxnodejs
+-lib thx.core
+--js del.js

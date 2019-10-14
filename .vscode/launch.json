@@ -1,0 +1,17 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+	{
+		"type": "node",
+		"request": "launch",
+		"preLaunchTask": "test",
+		"name": "Launch Program",
+		"program": "${workspaceFolder}/tests.js"
+	},
+		{
+			"name": "Haxe Interpreter",
+			"type": "haxe-eval",
+			"request": "launch"
+		}
+	]
+}

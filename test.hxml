@@ -1,0 +1,10 @@
+-cp src
+-cp tests
+-D analyzer-optimize
+-main RunAll
+--debug
+-D no-deprecation-warnings
+-lib utest
+-lib hxnodejs
+-lib thx.core
+--js tests.js
