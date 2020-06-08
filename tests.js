@@ -849,9 +849,9 @@ TimeTask.prototype = {
 	}
 	,update: function(dt) {
 		if(this.paused) {
-			return;
+			return this.now;
 		}
-		if(this.delays.length > 0 && this.delays[0].dby <= this.now) {
+		if(this.delays != null && this.delays.length > 0 && this.delays[0].dby <= this.now) {
 			var last = this.delays.length == 1;
 			var d = this.delays.shift();
 			d.cb();
@@ -861,6 +861,7 @@ TimeTask.prototype = {
 			d.cb = null;
 		}
 		this.now += dt;
+		return this.now;
 	}
 	,__class__: TimeTask
 };
@@ -7425,7 +7426,6 @@ thx_Dates.parseDate = function(s) {
 		return thx_Either.Right(HxOverrides.strDate(s));
 	} catch( e ) {
 		haxe_CallStack.lastException = e;
-		((e) instanceof js__$Boot_HaxeError);
 		return thx_Either.Left("" + s + " could not be parsed to a valid Date value.");
 	}
 };
@@ -8118,7 +8118,6 @@ var thx_Error = function(message,stack,pos) {
 			stack = haxe_CallStack.exceptionStack();
 		} catch( e ) {
 			haxe_CallStack.lastException = e;
-			((e) instanceof js__$Boot_HaxeError);
 			stack = [];
 		}
 		if(stack.length == 0) {
@@ -8126,7 +8125,6 @@ var thx_Error = function(message,stack,pos) {
 				stack = haxe_CallStack.callStack();
 			} catch( e1 ) {
 				haxe_CallStack.lastException = e1;
-				((e1) instanceof js__$Boot_HaxeError);
 				stack = [];
 			}
 		}
@@ -9079,8 +9077,6 @@ thx_Int64s.toFloat = function(i) {
 			ret += multiplier;
 		}
 		multiplier *= 2.0;
-		var b3 = 1;
-		b3 = 1;
 		i = new haxe__$Int64__$_$_$Int64(i.high >> 1,i.high << 31 | i.low >>> 1);
 	}
 	return (isNegative ? -1 : 1) * ret;
@@ -10570,7 +10566,6 @@ thx_Objects.removePath = function(o,path) {
 		}
 	} catch( e ) {
 		haxe_CallStack.lastException = e;
-		((e) instanceof js__$Boot_HaxeError);
 	}
 	return o;
 };
@@ -12956,6 +12951,8 @@ thx_Types.isPrimitive = function(v) {
 	switch(_g._hx_index) {
 	case 1:case 2:case 3:
 		return true;
+	case 0:case 4:case 5:case 8:
+		return false;
 	case 6:
 		var _g2 = _g.c;
 		var c = _g2;
@@ -12971,8 +12968,6 @@ thx_Types.isPrimitive = function(v) {
 		}
 		break;
 	case 7:
-		return false;
-	case 0:case 4:case 5:case 8:
 		return false;
 	}
 };

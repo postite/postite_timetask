@@ -22,6 +22,13 @@ private class Task { //classes are faster
 	public inline function toString() return secs + " " + cb;
 }
 
+/**
+
+	TODO:
+	- consider looping
+ */
+
+
 class TimeTask {
 	var delays	: Array<Task>;
 	var now		: Float;
@@ -107,16 +114,17 @@ class TimeTask {
    }
 
 
+
 	public function addMs(?id:String, cb:Void->Void, msecs:Int) {
+		
 		delays.push( new Task(id,cb,Std.int((msecs/1000*fps))));
       calcdelayTime();
 		
 	}
 
 	public function addS(?id:String, cb:Void->Void,secs:Int) {
-      
+		
 		delays.push( new Task( id,cb,Std.int((secs*fps))) );
-     
       calcdelayTime();
       
 	}
@@ -132,10 +140,10 @@ class TimeTask {
 
     }
 
-   public function update(dt:Float){
+   public function update(dt:Float):Float{
       
          if(paused)
-             return;
+             return now;
         // trace( '$delayTime of $now');
         // while( delays.length>0  ) {
          if(delays!=null && delays.length>0 && delays[0].dby<=now){
@@ -146,13 +154,15 @@ class TimeTask {
 			
 			d.cb();
 
-				if(last)
+				if(last){
 				done();
+				}
 
 			
 
 			d.cb = null;//help garbage
 		   }
          now+=dt;
+			return now;
    }
 }

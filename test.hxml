@@ -8,3 +8,4 @@
 -lib hxnodejs
 -lib thx.core
 --js tests.js
+#-cmd node tests.js
